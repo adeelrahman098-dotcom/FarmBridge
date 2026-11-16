@@ -1,10 +1,10 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { MarketplaceProvider } from './context/MarketplaceContext';
 
-import RoleSwitcherBar from './components/common/RoleSwitcherBar';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import ToastContainer from './components/common/ToastContainer';
@@ -49,6 +49,26 @@ import MessagesPage from './pages/shared/MessagesPage';
 import NotificationsPage from './pages/shared/NotificationsPage';
 import ProfileSettingsPage from './pages/shared/ProfileSettingsPage';
 
+const ROLE_HOME = {
+  farmer: '/farmer/dashboard',
+  buyer: '/buyer/dashboard',
+  transport: '/transport/dashboard',
+  admin: '/admin/dashboard'
+};
+
+function RequireAuth({ roles }) {
+  const { currentUser } = useAuth();
+  const location = useLocation();
+
+  if (!currentUser) {
+    return <Navigate to="/login" replace state={{ from: location }} />;
+  }
+  if (roles && !roles.includes(currentUser.role)) {
+    return <Navigate to={ROLE_HOME[currentUser.role] || '/'} replace />;
+  }
+  return <Outlet />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -56,7 +76,6 @@ export default function App() {
         <NotificationProvider>
           <MarketplaceProvider>
             <div className="min-h-screen flex flex-col bg-cream-50 text-slate-800">
-              <RoleSwitcherBar />
               <Navbar />
 
               <main className="flex-1">
@@ -70,36 +89,41 @@ export default function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignUpPage />} />
 
-                  {/* Farmer routes */}
-                  <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
-                  <Route path="/farmer/products" element={<FarmerProducts />} />
-                  <Route path="/farmer/offers" element={<FarmerOffers />} />
-                  <Route path="/farmer/orders" element={<FarmerOrders />} />
-                  <Route path="/farmer/earnings" element={<FarmerEarnings />} />
+                  <Route element={<RequireAuth roles={['farmer']} />}>
+                    <Route path="/farmer/dashboard" element={<FarmerDashboard />} />
+                    <Route path="/farmer/products" element={<FarmerProducts />} />
+                    <Route path="/farmer/offers" element={<FarmerOffers />} />
+                    <Route path="/farmer/orders" element={<FarmerOrders />} />
+                    <Route path="/farmer/earnings" element={<FarmerEarnings />} />
+                  </Route>
 
-                  {/* Buyer routes */}
-                  <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
-                  <Route path="/buyer/offers" element={<BuyerOffers />} />
-                  <Route path="/buyer/orders" element={<BuyerOrders />} />
-                  <Route path="/buyer/saved" element={<BuyerSaved />} />
-                  <Route path="/buyer/history" element={<BuyerHistory />} />
+                  <Route element={<RequireAuth roles={['buyer']} />}>
+                    <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
+                    <Route path="/buyer/offers" element={<BuyerOffers />} />
+                    <Route path="/buyer/orders" element={<BuyerOrders />} />
+                    <Route path="/buyer/saved" element={<BuyerSaved />} />
+                    <Route path="/buyer/history" element={<BuyerHistory />} />
+                  </Route>
 
-                  {/* Transport routes */}
-                  <Route path="/transport/dashboard" element={<TransportDashboard />} />
-                  <Route path="/transport/available" element={<AvailableJobs />} />
-                  <Route path="/transport/active" element={<ActiveDeliveries />} />
+                  <Route element={<RequireAuth roles={['transport']} />}>
+                    <Route path="/transport/dashboard" element={<TransportDashboard />} />
+                    <Route path="/transport/available" element={<AvailableJobs />} />
+                    <Route path="/transport/active" element={<ActiveDeliveries />} />
+                  </Route>
 
-                  {/* Admin routes */}
-                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                  <Route path="/admin/verification" element={<UserVerification />} />
-                  <Route path="/admin/moderation" element={<ProductModeration />} />
-                  <Route path="/admin/complaints" element={<ComplaintsManager />} />
-                  <Route path="/admin/reports" element={<FinancialReports />} />
+                  <Route element={<RequireAuth roles={['admin']} />}>
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/verification" element={<UserVerification />} />
+                    <Route path="/admin/moderation" element={<ProductModeration />} />
+                    <Route path="/admin/complaints" element={<ComplaintsManager />} />
+                    <Route path="/admin/reports" element={<FinancialReports />} />
+                  </Route>
 
-                  {/* Shared routes */}
-                  <Route path="/messages" element={<MessagesPage />} />
-                  <Route path="/notifications" element={<NotificationsPage />} />
-                  <Route path="/profile" element={<ProfileSettingsPage />} />
+                  <Route element={<RequireAuth />}>
+                    <Route path="/messages" element={<MessagesPage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
+                    <Route path="/profile" element={<ProfileSettingsPage />} />
+                  </Route>
 
                   {/* Fallback */}
                   <Route path="*" element={<Navigate to="/" replace />} />

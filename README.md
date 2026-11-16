@@ -42,13 +42,12 @@
 
 ---
 
-## ⚡ 1-Click Role Switcher Playground
+## Authentication Prototype
 
-A persistent top navigation bar allows **instant 1-click switching** between pre-configured demo personas:
-- **Farmer**: Rahim Uddin (*Barendra Green Agro, Bogura*)
-- **Buyer**: Anika Tabassum (*Bengal Fresh Retail Chain, Dhaka*)
-- **Transport**: Rafiqul Islam (*7-Ton Covered Van Carrier*)
-- **Admin**: Kabir Chowdhury (*Marketplace Operations & Governance*)
+- Accounts are created with a password and marketplace role; passwords are stored as salted PBKDF2 hashes in browser storage.
+- Sign-in is required for account pages, and role-specific pages redirect users who do not have the matching role.
+- Seed marketplace personas are sample data and cannot be used to sign in.
+- This frontend-only prototype is not a production authentication system. Browser storage and client-side role checks can be modified by users; production deployments must authenticate sessions and authorize every protected operation on a trusted backend.
 
 ---
 

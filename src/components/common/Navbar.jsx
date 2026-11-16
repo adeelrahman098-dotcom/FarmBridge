@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function Navbar() {
-  const { currentUser, logout, switchRole } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { unreadCount } = useNotifications();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -125,31 +125,33 @@ export default function Navbar() {
 
           {/* Right Action Icons */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Messages link */}
-            <Link
-              to="/messages"
-              className="p-2 text-slate-600 hover:text-forest-900 hover:bg-cream-100 rounded-lg relative"
-              title="Chat & Inquiries"
-            >
-              <MessageSquare className="w-5 h-5" />
-            </Link>
+            {currentUser && (
+              <>
+                <Link
+                  to="/messages"
+                  className="p-2 text-slate-600 hover:text-forest-900 hover:bg-cream-100 rounded-lg relative"
+                  title="Chat & Inquiries"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                </Link>
 
-            {/* Notifications */}
-            <Link
-              to="/notifications"
-              className="p-2 text-slate-600 hover:text-forest-900 hover:bg-cream-100 rounded-lg relative"
-              title="Notifications"
-            >
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1 right-1 w-4 h-4 bg-amber-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse">
-                  {unreadCount}
-                </span>
-              )}
-            </Link>
+                <Link
+                  to="/notifications"
+                  className="p-2 text-slate-600 hover:text-forest-900 hover:bg-cream-100 rounded-lg relative"
+                  title="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-amber-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Link>
+              </>
+            )}
 
             {/* User Profile Dropdown */}
-            <div className="relative">
+            {currentUser ? <div className="relative">
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center gap-2 p-1.5 pl-2 rounded-full border border-cream-300 hover:border-forest-400 bg-white hover:bg-cream-50 transition"
@@ -211,7 +213,16 @@ export default function Navbar() {
                   </div>
                 </div>
               )}
-            </div>
+            </div> : (
+              <div className="flex items-center gap-2">
+                <Link to="/login" className="px-3 py-2 text-sm font-semibold text-forest-900 hover:bg-cream-100 rounded-lg">
+                  Sign In
+                </Link>
+                <Link to="/signup" className="px-3 py-2 text-sm font-semibold text-white bg-forest-900 hover:bg-forest-800 rounded-lg">
+                  Create Account
+                </Link>
+              </div>
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -248,14 +259,22 @@ export default function Navbar() {
           >
             About FarmBridge
           </Link>
-          <Link
-            to={getDashboardPath()}
-            onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-semibold bg-forest-50 text-forest-900"
-          >
-            <RoleIcon className="w-5 h-5 text-forest-700" />
-            <span>My Role Dashboard</span>
-          </Link>
+          {currentUser && (
+            <Link
+              to={getDashboardPath()}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-semibold bg-forest-50 text-forest-900"
+            >
+              <RoleIcon className="w-5 h-5 text-forest-700" />
+              <span>My Role Dashboard</span>
+            </Link>
+          )}
+          {!currentUser && (
+            <div className="flex gap-2 pt-1">
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex-1 text-center px-3 py-2 rounded-lg font-semibold text-forest-900 bg-cream-100">Sign In</Link>
+              <Link to="/signup" onClick={() => setMobileMenuOpen(false)} className="flex-1 text-center px-3 py-2 rounded-lg font-semibold text-white bg-forest-900">Create Account</Link>
+            </div>
+          )}
         </div>
       )}
     </header>

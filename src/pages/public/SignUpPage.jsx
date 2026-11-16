@@ -14,17 +14,34 @@ export default function SignUpPage() {
   const [phone, setPhone] = useState('+880 1');
   const [district, setDistrict] = useState('Bogura');
   const [farmOrBusinessName, setFarmOrBusinessName] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    signup({
+    setError('');
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    const result = await signup({
       name,
       email,
       phone,
       role,
       district,
-      farmOrBusinessName
+      farmOrBusinessName,
+      password
     });
+    setIsSubmitting(false);
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
 
     if (role === 'farmer') navigate('/farmer/dashboard');
     else if (role === 'buyer') navigate('/buyer/dashboard');
@@ -42,6 +59,11 @@ export default function SignUpPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl border border-cream-200 shadow-sm space-y-5">
+        {error && (
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium" role="alert">
+            {error}
+          </div>
+        )}
         {/* Role Choice */}
         <div>
           <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -160,12 +182,40 @@ export default function SignUpPage() {
           </select>
         </div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Password</label>
+            <input
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full text-xs bg-cream-50 border border-cream-300 rounded-xl p-2.5 focus:ring-2 focus:ring-leaf-500 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Confirm Password</label>
+            <input
+              type="password"
+              required
+              minLength={8}
+              autoComplete="new-password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full text-xs bg-cream-50 border border-cream-300 rounded-xl p-2.5 focus:ring-2 focus:ring-leaf-500 focus:outline-none"
+            />
+          </div>
+        </div>
+
         <button
           type="submit"
+          disabled={isSubmitting}
           className="w-full py-3 bg-leaf-600 hover:bg-leaf-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center justify-center gap-1.5"
         >
           <Check className="w-4 h-4" />
-          <span>Complete Registration</span>
+          <span>{isSubmitting ? 'Creating Account...' : 'Complete Registration'}</span>
         </button>
 
         <p className="text-center text-xs text-slate-500 pt-1">

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { useAuth } from '../../context/AuthContext';
 import { formatBDT } from '../../utils/formatters';
@@ -6,7 +7,7 @@ import { X, HandCoins, Calendar, AlertCircle, CheckCircle2 } from 'lucide-react'
 
 export default function OfferModal({ product, onClose, onSuccess }) {
   const { createOffer } = useMarketplace();
-  const { currentUser, switchUser } = useAuth();
+  const { currentUser } = useAuth();
 
   const [quantity, setQuantity] = useState(product?.minOrderQuantity || 100);
   const [offeredUnitPrice, setOfferedUnitPrice] = useState(
@@ -20,6 +21,7 @@ export default function OfferModal({ product, onClose, onSuccess }) {
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
 
   if (!product) return null;
 
@@ -30,11 +32,12 @@ export default function OfferModal({ product, onClose, onSuccess }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // If current role is not buyer, suggest switching or switch to buyer Anika
-    if (currentUser.role !== 'buyer') {
-      switchUser('user_buyer_1');
+    if (currentUser?.role !== 'buyer') {
+      setSubmissionError('Sign in with a buyer account to submit an offer.');
+      return;
     }
 
+    setSubmissionError('');
     setIsSubmitting(true);
     setTimeout(() => {
       createOffer({
@@ -82,6 +85,12 @@ export default function OfferModal({ product, onClose, onSuccess }) {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            {submissionError && (
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium" role="alert">
+                {submissionError}{' '}
+                {!currentUser && <Link to="/login" className="font-bold underline">Sign in</Link>}
+              </div>
+            )}
             {/* Product Summary */}
             <div className="flex items-center gap-3.5 bg-cream-50 p-3 rounded-2xl border border-cream-200">
               <img

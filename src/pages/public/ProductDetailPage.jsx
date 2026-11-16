@@ -25,7 +25,7 @@ export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, savedProductIds, toggleSaveProduct } = useMarketplace();
-  const { users } = useAuth();
+  const { currentUser, users } = useAuth();
 
   const product = products.find(p => p.id === id);
 
@@ -213,7 +213,9 @@ export default function ProductDetailPage() {
               </div>
 
               <button
-                onClick={() => setChatOpen(true)}
+                onClick={() => currentUser
+                  ? setChatOpen(true)
+                  : navigate('/login', { state: { from: { pathname: window.location.pathname } } })}
                 className="px-3.5 py-2 border border-cream-300 hover:border-forest-600 text-forest-800 hover:bg-cream-50 rounded-xl text-xs font-bold flex items-center gap-1.5 transition"
               >
                 <MessageSquare className="w-3.5 h-3.5 text-forest-700" />
